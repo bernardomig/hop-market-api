@@ -8,10 +8,12 @@ import { JwtStrategy } from './jwt.strategy';
 import { LocalStrategy } from './local.strategy';
 import { env } from 'process';
 
+const passportModule = PassportModule.register({ defaultStrategy: 'jwt' });
+
 @Module({
   imports: [
+    passportModule,
     UsersModule,
-    PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: env.JWT_SECRET || 'secret',
       signOptions: { expiresIn: '60m' },
@@ -19,5 +21,6 @@ import { env } from 'process';
   ],
   providers: [AuthService, LocalStrategy, JwtStrategy],
   controllers: [AuthController],
+  exports: [passportModule],
 })
 export class AuthModule {}
