@@ -5,6 +5,7 @@ import { Login } from './login.interface';
 import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/users/user.entity';
 import { Token } from './token.interface';
+import { UserDto } from 'src/users/user.dto';
 
 @Injectable()
 export class AuthService {
@@ -34,4 +35,9 @@ export class AuthService {
       token: this.jwtService.sign(payload),
     };
   }
+
+  async register(user: UserDto): Promise <User> {
+    return this.usersService.create(user).catch(err => {throw err; });
+  }
+
 }
