@@ -16,17 +16,27 @@ import { ProductDto } from './product.dto';
 import { Product } from './product.entity';
 import { ProductsService } from './products.service';
 import { ApiUseTags } from '@nestjs/swagger';
+import { QrcodeService } from '../qrcode/qrcode.service';
 
 const Id = (name: string) => Param(name, new ParseIntPipe());
 
 @ApiUseTags('Products')
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly productsService: ProductsService) {}
+  constructor(private readonly productsService: ProductsService, private readonly qrCodeService: QrcodeService) { }
 
   @Get()
   async findAll(): Promise<Product[]> {
     return this.productsService.findAll();
+  }
+
+  @Get(':id/qr')
+  async generateQrCode(@Param('id') id: number): Promise<string> {
+    const product = await this.productsService.findOne(id);
+
+    const code = `product:${id}`
+
+    return this.qrCodeService.encode(code);
   }
 
   @Get('latest')

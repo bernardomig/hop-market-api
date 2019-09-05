@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { ProductsModule } from './products/products.module';
 import { UsersModule } from './users/users.module';
 import { ItemsModule } from './items/items.module';
+import { QrcodeService } from './qrcode/qrcode.service';
 
 @Module({
   imports: [
@@ -25,5 +26,7 @@ import { ItemsModule } from './items/items.module';
     ItemsModule,
   ],
   controllers: [AppController],
+  providers: [QrcodeService],
+  exports: [QrcodeService]
 })
-export class AppModule {}
+export class AppModule { }

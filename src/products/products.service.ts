@@ -15,7 +15,7 @@ export class ProductsService {
     @InjectRepository(Product)
     private readonly productsRepository: Repository<Product>,
     private readonly usersService: UsersService,
-  ) {}
+  ) { }
 
   async findAll(): Promise<Product[]> {
     return this.productsRepository.find();
