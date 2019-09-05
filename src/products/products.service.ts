@@ -6,7 +6,6 @@ import {
 import { Product } from './product.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ProductDto } from './product.dto';
 import { UsersService } from '../users/users.service';
 
 @Injectable()
@@ -31,16 +30,13 @@ export class ProductsService {
 
   async latest(): Promise<Product[]> {
     return this.productsRepository.find({
-      order: { createAt: 'DESC' },
+      order: { createdAt: 'DESC' },
       take: 10,
     });
   }
 
-  async create(product: Product, userId: number): Promise<Product> {
-    const newProduct = this.productsRepository.create({
-      ...product,
-      userId,
-    });
+  async create(product: Product): Promise<Product> {
+    const newProduct = this.productsRepository.create(product);
 
     return this.productsRepository.save(newProduct);
   }

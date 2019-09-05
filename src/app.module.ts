@@ -8,6 +8,7 @@ import { UsersModule } from './users/users.module';
 import { ItemsModule } from './items/items.module';
 
 import { env } from 'process';
+import { TransactionsModule } from './transactions/transactions.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { env } from 'process';
     AuthModule,
     ProductsModule,
     ItemsModule,
+    TransactionsModule,
   ],
   controllers: [AppController],
 })

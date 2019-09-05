@@ -4,19 +4,25 @@ import {
   Delete,
   Get,
   Param,
-  ParseIntPipe,
   Post,
   Request,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Login } from '../auth/login.interface';
-import { ProductDto } from './product.dto';
 import { Product } from './product.entity';
 import { ProductsService } from './products.service';
 import { ApiUseTags } from '@nestjs/swagger';
+import { Length } from 'class-validator';
 
-const Id = (name: string) => Param(name, new ParseIntPipe());
+export class CreateProductDto {
+  @Length(5)
+  name: string;
+
+  description: string;
+
+  ingredients: number[];
+}
 
 @ApiUseTags('Products')
 @Controller('products')
@@ -47,7 +53,7 @@ export class ProductsController {
   }
 
   @Get(':id')
-  async findOne(@Id('id') productId: number) {
+  async findOne(@Param('id') productId: number) {
     return this.productsService.findOne(productId);
   }
 
@@ -55,14 +61,18 @@ export class ProductsController {
   @Post()
   async create(
     @Request() request: { user: Login },
-    @Body() product: ProductDto,
+    @Body() product: CreateProductDto,
   ) {
     const { userId } = request.user;
 
-    const { productId } = await this.productsService.create(
-      product as Product,
+    const { name, description, ingredients } = product;
+
+    const { productId } = await this.productsService.create({
+      name,
+      description: description || '',
+      ingredients: [],
       userId,
-    );
+    });
 
     return {
       productId,
@@ -73,7 +83,7 @@ export class ProductsController {
   @Delete(':id')
   async delete(
     @Request() request: { user: Login },
-    @Id('id') productId: number,
+    @Param('id') productId: number,
   ) {
     const { userId } = request.user;
     await this.productsService.delete(productId, userId);
