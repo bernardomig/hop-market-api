@@ -28,4 +28,6 @@ export class Transactions {
 
   @Column('enum', { enum: TransactionType })
   type: string;
+  @Column()
+  typeTransaction: string;
 }
