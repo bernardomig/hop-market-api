@@ -1,6 +1,5 @@
 # Hop Market API
 
-
 ## Create a database
 
 ```
@@ -8,5 +7,5 @@
 sudo apt install mariadb-server
 # Connect to the database with user
 sudo mysql
-# 
+#
 ```

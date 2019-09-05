@@ -23,4 +23,7 @@ export class Product {
 
   @ManyToOne(type => User, { lazy: true })
   user: Promise<User>;
+
+  @Column({ type: 'text' })
+  description: string;
 }

@@ -36,10 +36,10 @@ export class ProductsService {
     });
   }
 
-  async create(product: ProductDto, userId: number): Promise<Product> {
+  async create(product: Product, userId: number): Promise<Product> {
     const newProduct = this.productsRepository.create({
-      userId,
       ...product,
+      userId,
     });
 
     return this.productsRepository.save(newProduct);
