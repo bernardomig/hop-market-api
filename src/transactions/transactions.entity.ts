@@ -20,7 +20,7 @@ export class Transactions {
   @Column('point')
   locatedIn: number;
 
-  @Column('string')
-  type: string;
+  @Column()
+  typeTransaction: string;
 
 }
