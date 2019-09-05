@@ -4,6 +4,7 @@ import {
   JoinTable,
   ManyToOne,
   PrimaryGeneratedColumn,
+  CreateDateColumn,
 } from 'typeorm';
 import { User } from '../users/user.entity';
 
@@ -15,10 +16,12 @@ export class Product {
   @Column({ length: 25 })
   name: string;
 
+  @CreateDateColumn()
+  createAt: string;
+
   @Column()
   userId: number;
 
-  @ManyToOne(type => User)
-  @JoinTable()
+  @ManyToOne(type => User, { lazy: true })
   user: Promise<User>;
 }

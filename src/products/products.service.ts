@@ -25,6 +25,13 @@ export class ProductsService {
     return this.productsRepository.findOne(id);
   }
 
+  async latest(): Promise<Product[]> {
+    return this.productsRepository.find({
+      order: { createAt: 'DESC' },
+      take: 10,
+    });
+  }
+
   async create(product: ProductDto, userId: number): Promise<Product> {
     const newProduct = this.productsRepository.create({
       userId,
@@ -37,10 +44,14 @@ export class ProductsService {
   async delete(productId: number, userId: number) {
     const product = await this.findOne(productId);
 
+    if (!product) {
+      throw new BadRequestException('product not found');
+    }
+
     if (product.userId !== userId) {
       throw new ForbiddenException('you are not the owner of the product');
     }
 
-    this.productsRepository.delete(product);
+    await this.productsRepository.remove(product);
   }
 }
