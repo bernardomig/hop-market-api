@@ -16,6 +16,7 @@ import { env } from 'process';
       database: 'hopmarket.sqlite',
       logging: true,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
+      synchronize: true,
     }),
     UsersModule,
     AuthModule,
