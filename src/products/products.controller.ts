@@ -17,6 +17,7 @@ import {
   ApiModelProperty,
   ApiBearerAuth,
   ApiResponse,
+  ApiOperation,
 } from '@nestjs/swagger';
 import { Length } from 'class-validator';
 import { QrcodeService } from '../qrcode/qrcode.service';
@@ -29,6 +30,10 @@ export class CreateProductDto {
   description: string = '';
 
   ingredients: number[] = [];
+
+  constructor(props: any) {
+    Object.assign(this, props);
+  }
 }
 
 export class ProductBriefDto {
@@ -46,6 +51,10 @@ export class ProductBriefDto {
   @ApiModelProperty({ description: 'the name of the product' })
   @Expose()
   name: string;
+
+  constructor(props: any) {
+    Object.assign(this, props);
+  }
 }
 
 const productBriefTransform = product =>
@@ -59,6 +68,7 @@ export class ProductsController {
     private readonly qrCodeService: QrcodeService,
   ) {}
 
+  @ApiOperation({ title: 'Finds all the products' })
   @Get()
   async findAll(): Promise<ProductBriefDto[]> {
     const products = await this.productsService.findAll();
@@ -75,6 +85,7 @@ export class ProductsController {
     return this.qrCodeService.encode(code);
   }
 
+  @ApiOperation({ title: 'Finds the newest created products' })
   @ApiResponse({ status: 200, type: ProductBriefDto })
   @Get('latest')
   async latest(): Promise<ProductBriefDto[]> {
@@ -83,11 +94,13 @@ export class ProductsController {
     return products.map(productBriefTransform);
   }
 
+  @ApiOperation({ title: 'Finds the products created by a specific user' })
   @Get('by-user/:id')
   async findAllByUser(@Param('id') id: number) {
     return this.productsService.findOneByUser(id);
   }
 
+  @ApiOperation({ title: 'Lists the products created by the login user' })
   @ApiBearerAuth()
   @UseGuards(AuthGuard())
   @Get('mine')
@@ -97,11 +110,14 @@ export class ProductsController {
     return this.productsService.findOneByUser(userId);
   }
 
+  @ApiOperation({ title: 'Finds a specific product' })
   @Get(':id')
   async findOne(@Param('id') productId: number) {
     return this.productsService.findOne(productId);
   }
 
+  @ApiOperation({ title: 'Creates a new product' })
+  @ApiBearerAuth()
   @UseGuards(AuthGuard())
   @Post()
   async create(
@@ -128,6 +144,8 @@ export class ProductsController {
     };
   }
 
+  @ApiOperation({ title: 'Deletes a product' })
+  @ApiBearerAuth()
   @UseGuards(AuthGuard())
   @Delete(':id')
   async delete(

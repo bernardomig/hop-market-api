@@ -22,6 +22,7 @@ const swaggerDocument = new DocumentBuilder()
   .setTitle('HopMarket')
   .setDescription('A relational market for everyone')
   .setVersion('0.1')
+  .addBearerAuth()
   .build();
 
 async function bootstrap() {
