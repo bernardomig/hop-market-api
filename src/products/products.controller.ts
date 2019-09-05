@@ -14,6 +14,7 @@ import { Product } from './product.entity';
 import { ProductsService } from './products.service';
 import { ApiUseTags } from '@nestjs/swagger';
 import { Length } from 'class-validator';
+import { QrcodeService } from '../qrcode/qrcode.service';
 
 export class CreateProductDto {
   @Length(5)
@@ -27,11 +28,23 @@ export class CreateProductDto {
 @ApiUseTags('Products')
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly productsService: ProductsService) {}
+  constructor(
+    private readonly productsService: ProductsService,
+    private readonly qrCodeService: QrcodeService,
+  ) {}
 
   @Get()
   async findAll(): Promise<Product[]> {
     return this.productsService.findAll();
+  }
+
+  @Get(':id/qr')
+  async generateQrCode(@Param('id') id: number): Promise<string> {
+    const product = await this.productsService.findOne(id);
+
+    const code = `product:${id}`;
+
+    return this.qrCodeService.encode(code);
   }
 
   @Get('latest')
