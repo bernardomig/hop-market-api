@@ -14,8 +14,11 @@ import { TransactionsModule } from './transactions/transactions.module';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
-      type: 'sqlite',
-      database: 'hopmarket.sqlite',
+      type: 'mariadb',
+      database: 'hopmarket',
+      host: 'localhost',
+      username: 'hopmarket',
+      password: 'hopmarket',
       logging: true,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,
@@ -28,6 +31,6 @@ import { TransactionsModule } from './transactions/transactions.module';
   ],
   controllers: [AppController],
   providers: [QrcodeService],
-  exports: [QrcodeService]
+  exports: [QrcodeService],
 })
-export class AppModule { }
+export class AppModule {}

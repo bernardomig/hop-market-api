@@ -15,15 +15,28 @@ import { ProductsService } from './products.service';
 import { ApiUseTags } from '@nestjs/swagger';
 import { Length } from 'class-validator';
 import { QrcodeService } from '../qrcode/qrcode.service';
+import { plainToClass, classToPlain, Expose } from 'class-transformer';
 
 export class CreateProductDto {
   @Length(5)
   name: string;
 
-  description: string;
+  description: string = '';
 
-  ingredients: number[];
+  ingredients: number[] = [];
 }
+
+export class ProductBriefDto {
+  @Expose()
+  productId: number;
+  @Expose()
+  userId: number;
+  @Expose()
+  name: string;
+}
+
+const productBriefTransform = product =>
+  plainToClass(ProductBriefDto, product, { excludeExtraneousValues: true });
 
 @ApiUseTags('Products')
 @Controller('products')
@@ -34,8 +47,10 @@ export class ProductsController {
   ) {}
 
   @Get()
-  async findAll(): Promise<Product[]> {
-    return this.productsService.findAll();
+  async findAll(): Promise<ProductBriefDto[]> {
+    const products = await this.productsService.findAll();
+
+    return products.map(productBriefTransform);
   }
 
   @Get(':id/qr')
@@ -48,8 +63,10 @@ export class ProductsController {
   }
 
   @Get('latest')
-  async latest() {
-    return this.productsService.latest();
+  async latest(): Promise<ProductBriefDto[]> {
+    const products = await this.productsService.latest();
+
+    return products.map(productBriefTransform);
   }
 
   @Get('by-user/:id')
@@ -83,7 +100,11 @@ export class ProductsController {
     const { productId } = await this.productsService.create({
       name,
       description: description || '',
-      ingredients: [],
+      ingredients: Promise.all(
+        ingredients.map(ingredientId =>
+          this.productsService.findOne(ingredientId),
+        ),
+      ),
       userId,
     });
 

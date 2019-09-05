@@ -5,6 +5,7 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   ManyToMany,
+  JoinTable,
 } from 'typeorm';
 import { User } from '../users/user.entity';
 
@@ -29,5 +30,6 @@ export class Product {
   description: string;
 
   @ManyToMany(type => Product)
-  ingredients: Product[];
+  @JoinTable()
+  ingredients?: Promise<Product[]>;
 }
