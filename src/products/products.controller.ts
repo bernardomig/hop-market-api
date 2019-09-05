@@ -34,6 +34,19 @@ export class ProductsController {
     return this.productsService.latest();
   }
 
+  @Get('by-user/:id')
+  async findAllByUser(@Param('id') id: number) {
+    return this.productsService.findOneByUser(id);
+  }
+
+  @UseGuards(AuthGuard())
+  @Get('mine')
+  async findMyProducts(@Request() request: { user: Login }) {
+    const { userId } = request.user;
+
+    return this.productsService.findOneByUser(userId);
+  }
+
   @Get(':id')
   async findOne(@Id('id') productId: number) {
     return this.productsService.findOne(productId);

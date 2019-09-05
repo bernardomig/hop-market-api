@@ -25,6 +25,10 @@ export class ProductsService {
     return this.productsRepository.findOne(id);
   }
 
+  async findOneByUser(userId: number): Promise<Product[]> {
+    return this.productsRepository.find({ userId });
+  }
+
   async latest(): Promise<Product[]> {
     return this.productsRepository.find({
       order: { createAt: 'DESC' },

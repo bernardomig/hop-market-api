@@ -5,7 +5,6 @@ import {
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
-  JoinTable,
 } from 'typeorm';
 import { Product } from '../products/product.entity';
 

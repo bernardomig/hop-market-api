@@ -41,4 +41,14 @@ export class ItemsService {
 
     return this.itemsRepository.save(item);
   }
+
+  async transfer(itemId: number, ownerId: number, buyerId: number) {
+    const item = await this.findOne(itemId);
+
+    if (ownerId !== item.userId) {
+      throw new BadRequestException('only the owner can transfer the product');
+    }
+
+    const buyer = await this.usersService.findOne(buyerId);
+  }
 }
