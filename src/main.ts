@@ -30,7 +30,7 @@ async function bootstrap() {
   app.useGlobalPipes(globalPipe);
 
   SwaggerModule.setup(
-    'swagger',
+    '_swagger',
     app,
     SwaggerModule.createDocument(app, swaggerDocument),
   );

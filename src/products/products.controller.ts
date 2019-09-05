@@ -12,7 +12,12 @@ import { AuthGuard } from '@nestjs/passport';
 import { Login } from '../auth/login.interface';
 import { Product } from './product.entity';
 import { ProductsService } from './products.service';
-import { ApiUseTags } from '@nestjs/swagger';
+import {
+  ApiUseTags,
+  ApiModelProperty,
+  ApiBearerAuth,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { Length } from 'class-validator';
 import { QrcodeService } from '../qrcode/qrcode.service';
 import { plainToClass, classToPlain, Expose } from 'class-transformer';
@@ -27,10 +32,18 @@ export class CreateProductDto {
 }
 
 export class ProductBriefDto {
+  @ApiModelProperty({
+    description: 'the id of the product',
+    required: true,
+    example: 32,
+  })
   @Expose()
   productId: number;
+
   @Expose()
   userId: number;
+
+  @ApiModelProperty({ description: 'the name of the product' })
   @Expose()
   name: string;
 }
@@ -62,6 +75,7 @@ export class ProductsController {
     return this.qrCodeService.encode(code);
   }
 
+  @ApiResponse({ status: 200, type: ProductBriefDto })
   @Get('latest')
   async latest(): Promise<ProductBriefDto[]> {
     const products = await this.productsService.latest();
@@ -74,6 +88,7 @@ export class ProductsController {
     return this.productsService.findOneByUser(id);
   }
 
+  @ApiBearerAuth()
   @UseGuards(AuthGuard())
   @Get('mine')
   async findMyProducts(@Request() request: { user: Login }) {
