@@ -8,10 +8,9 @@ import {
   Post,
   Request,
   UseGuards,
-  BadRequestException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { Login } from 'src/auth/login.interface';
+import { Login } from '../auth/login.interface';
 import { ProductDto } from './product.dto';
 import { Product } from './product.entity';
 import { ProductsService } from './products.service';
@@ -70,7 +69,10 @@ export class ProductsController {
   ) {
     const { userId } = request.user;
 
-    const { productId } = await this.productsService.create(product, userId);
+    const { productId } = await this.productsService.create(
+      product as Product,
+      userId,
+    );
 
     return {
       productId,

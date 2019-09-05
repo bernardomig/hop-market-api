@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { Connection } from 'typeorm';
 import { AppController } from './app.controller';
 import { AuthModule } from './auth/auth.module';
@@ -8,15 +8,14 @@ import { UsersModule } from './users/users.module';
 import { ItemsModule } from './items/items.module';
 import { QrcodeService } from './qrcode/qrcode.service';
 
+import { env } from 'process';
+
 @Module({
   imports: [
     TypeOrmModule.forRoot({
-      type: 'mariadb',
-      host: 'localhost',
-      port: 3306,
-      username: 'hopmarket',
-      password: 'hopmarket',
-      database: 'hopmarket',
+      type: 'sqlite',
+      database: 'hopmarket.sqlite',
+      logging: true,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,
     }),
