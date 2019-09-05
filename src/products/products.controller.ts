@@ -12,18 +12,44 @@ import { AuthGuard } from '@nestjs/passport';
 import { Login } from '../auth/login.interface';
 import { Product } from './product.entity';
 import { ProductsService } from './products.service';
-import { ApiUseTags } from '@nestjs/swagger';
+import {
+  ApiUseTags,
+  ApiModelProperty,
+  ApiBearerAuth,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { Length } from 'class-validator';
 import { QrcodeService } from '../qrcode/qrcode.service';
+import { plainToClass, classToPlain, Expose } from 'class-transformer';
 
 export class CreateProductDto {
   @Length(5)
   name: string;
 
-  description: string;
+  description: string = '';
 
-  ingredients: number[];
+  ingredients: number[] = [];
 }
+
+export class ProductBriefDto {
+  @ApiModelProperty({
+    description: 'the id of the product',
+    required: true,
+    example: 32,
+  })
+  @Expose()
+  productId: number;
+
+  @Expose()
+  userId: number;
+
+  @ApiModelProperty({ description: 'the name of the product' })
+  @Expose()
+  name: string;
+}
+
+const productBriefTransform = product =>
+  plainToClass(ProductBriefDto, product, { excludeExtraneousValues: true });
 
 @ApiUseTags('Products')
 @Controller('products')
@@ -34,8 +60,10 @@ export class ProductsController {
   ) {}
 
   @Get()
-  async findAll(): Promise<Product[]> {
-    return this.productsService.findAll();
+  async findAll(): Promise<ProductBriefDto[]> {
+    const products = await this.productsService.findAll();
+
+    return products.map(productBriefTransform);
   }
 
   @Get(':id/qr')
@@ -47,9 +75,12 @@ export class ProductsController {
     return this.qrCodeService.encode(code);
   }
 
+  @ApiResponse({ status: 200, type: ProductBriefDto })
   @Get('latest')
-  async latest() {
-    return this.productsService.latest();
+  async latest(): Promise<ProductBriefDto[]> {
+    const products = await this.productsService.latest();
+
+    return products.map(productBriefTransform);
   }
 
   @Get('by-user/:id')
@@ -57,6 +88,7 @@ export class ProductsController {
     return this.productsService.findOneByUser(id);
   }
 
+  @ApiBearerAuth()
   @UseGuards(AuthGuard())
   @Get('mine')
   async findMyProducts(@Request() request: { user: Login }) {
@@ -83,7 +115,11 @@ export class ProductsController {
     const { productId } = await this.productsService.create({
       name,
       description: description || '',
-      ingredients: [],
+      ingredients: Promise.all(
+        ingredients.map(ingredientId =>
+          this.productsService.findOne(ingredientId),
+        ),
+      ),
       userId,
     });
 
