@@ -27,17 +27,17 @@ class ItemIdDto {
 }
 
 class ItemCreateDto {
-  @ApiModelProperty({ example: '88' })
+  @ApiModelProperty({ description: 'The ID of the product.', example: '88' })
   productId: number;
 
-  @ApiModelProperty({ example: '40.63030438865182,-8.657526969909668' })
+  @ApiModelProperty({ description: 'This is the coordinates related to each transaction.', example: '40.63030438865182,-8.657526969909668' })
   location: string;
 }
 
 @ApiUseTags('Items')
 @Controller('items')
 export class ItemsController {
-  constructor(private readonly itemsService: ItemsService) {}
+  constructor(private readonly itemsService: ItemsService) { }
 
   @ApiOperation({ title: 'Lists all the items' })
   @Get()

@@ -25,26 +25,47 @@ import { ProductsService } from './products.service';
 
 export class CreateProductDto {
   @Length(5)
+  @ApiModelProperty({
+    description: 'The name of the product.',
+    required: true,
+    example: 'apple pie',
+  })
   name: string;
 
+  @ApiModelProperty({
+    description: 'The description of the product.',
+    required: true,
+    example:
+      'This pie is made of apples and is provided by the bakery "Lusitana".',
+  })
   description: string = '';
 
+  @ApiModelProperty({
+    description: 'The ingredients that make up the final product.',
+    required: false,
+    example: 'apples,sugar,flour,milk',
+  })
   ingredients: number[] = [];
 }
 
 export class ProductBriefDto {
   @ApiModelProperty({
-    description: 'the id of the product',
+    description: 'The id of the product.',
     required: true,
     example: 32,
   })
   @Expose()
   productId: number;
 
+  @ApiModelProperty({
+    description: 'The id of the user.',
+    required: true,
+    example: 1,
+  })
   @Expose()
   userId: number;
 
-  @ApiModelProperty({ description: 'the name of the product' })
+  @ApiModelProperty({ description: 'The name of the product.' })
   @Expose()
   name: string;
 }

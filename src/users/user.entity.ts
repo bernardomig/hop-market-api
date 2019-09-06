@@ -14,3 +14,5 @@ export class User {
   @Column({ type: 'text' })
   description: string;
 }
+
+//colocar o resto do formulario de registo;
