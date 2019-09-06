@@ -10,6 +10,7 @@ import { QrcodeService } from './qrcode/qrcode.service';
 
 import { env } from 'process';
 import { TransactionsModule } from './transactions/transactions.module';
+import { FilesService } from './files.service';
 
 @Module({
   imports: [
@@ -17,8 +18,8 @@ import { TransactionsModule } from './transactions/transactions.module';
       type: 'mariadb',
       database: 'hopmarket',
       host: 'localhost',
-      username: 'hopmarket',
-      password: 'hopmarket',
+      username: 'hop-market',
+      password: 'password',
       logging: true,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,
@@ -30,7 +31,7 @@ import { TransactionsModule } from './transactions/transactions.module';
     TransactionsModule,
   ],
   controllers: [AppController],
-  providers: [QrcodeService],
+  providers: [QrcodeService, FilesService],
   exports: [QrcodeService],
 })
-export class AppModule { }
+export class AppModule {}

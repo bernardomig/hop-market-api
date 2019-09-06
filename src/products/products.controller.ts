@@ -5,13 +5,21 @@ import {
   Get,
   Param,
   Post,
-  Request,
-  UseGuards,
   Query,
+  Request,
+  Res,
+  UploadedFiles,
+  UseGuards,
+  UseInterceptors,
+  Put,
+  ForbiddenException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
+  ApiConsumes,
+  ApiImplicitFile,
   ApiModelProperty,
   ApiOperation,
   ApiResponse,
@@ -19,9 +27,12 @@ import {
 } from '@nestjs/swagger';
 import { Expose, plainToClass } from 'class-transformer';
 import { Length } from 'class-validator';
+import { Response } from 'express';
 import { Login } from '../auth/login.interface';
+import { FilesService } from '../files.service';
 import { QrcodeService } from '../qrcode/qrcode.service';
 import { ProductsService } from './products.service';
+import { userInfo } from 'os';
 
 export class CreateProductDto {
   @Length(5)
@@ -78,8 +89,30 @@ const productBriefTransform = product =>
 export class ProductsController {
   constructor(
     private readonly productsService: ProductsService,
-    private readonly qrCodeService: QrcodeService,
+    private readonly fileService: FilesService,
   ) {}
+
+  @Get('photos')
+  async photos(): Promise<number[]> {
+    return [];
+  }
+
+  @ApiConsumes('multipart/form-data')
+  @ApiImplicitFile({ name: 'files', description: 'List of cats' })
+  @Post('photos')
+  @UseInterceptors(FilesInterceptor('files'))
+  async uploadPhotos(@UploadedFiles() files: any[]) {
+    return files.map(({ buffer, originalname, mimetype }) =>
+      this.fileService.upload('images', originalname, buffer, mimetype),
+    );
+  }
+
+  @Get('search')
+  async search(@Query('q') query: string): Promise<ProductBriefDto[]> {
+    const products = await this.productsService.search(query);
+
+    return products.map(productBriefTransform);
+  }
 
   @ApiOperation({ title: 'Finds all the products' })
   @Get()
@@ -118,6 +151,47 @@ export class ProductsController {
   @Get(':id')
   async findOne(@Param('id') productId: number) {
     return this.productsService.findOne(productId);
+  }
+
+  @Get(':id/photos')
+  async listPhotos(@Param('id') id: number) {
+    const photos = await this.productsService.findPhotos(id);
+
+    return photos.map(({ photoId, url }) => ({
+      photoId,
+      url,
+    }));
+  }
+
+  @Put(':id/photos')
+  @UseGuards(AuthGuard())
+  @UseInterceptors(FilesInterceptor('files'))
+  async addPhotos(
+    @Request() req: { user: Login },
+    @Param('id') id: number,
+    @UploadedFiles() files: any[],
+  ) {
+    const product = await this.productsService.findOne(id);
+
+    if (product.userId !== req.user.userId) {
+      throw new ForbiddenException('Add photos to product not allowed');
+    }
+
+    const urls = files.map(({ buffer, originalname, mimetype }) =>
+      this.fileService.upload('images', originalname, buffer, mimetype),
+    );
+
+    return Promise.all(
+      urls.map(url =>
+        this.productsService
+          .addPhoto({
+            url,
+            product: this.productsService.findOne(id),
+            productId: product.productId,
+          })
+          .then(({ url }) => url),
+      ),
+    );
   }
 
   @ApiOperation({ title: 'Creates a new product' })
@@ -159,30 +233,4 @@ export class ProductsController {
     const { userId } = request.user;
     await this.productsService.delete(productId, userId);
   }
-
-  //
-  // Search
-  //
-
-  @Get('search')
-  async search(@Query('q') query: string): Promise<ProductBriefDto[]> {
-    return [];
-  }
-
-  //
-  // QrCode Operations
-  //
-
-  @Get(':id/qr')
-  async generateQrCode(@Param('id') id: number): Promise<string> {
-    const product = await this.productsService.findOne(id);
-
-    const code = `product:${id}`;
-
-    return this.qrCodeService.encode(code);
-  }
-
-  //
-  // Images Operations
-  //
 }

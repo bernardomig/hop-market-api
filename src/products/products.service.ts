@@ -3,9 +3,10 @@ import {
   BadRequestException,
   ForbiddenException,
 } from '@nestjs/common';
-import { Product } from './product.entity';
+
+import { Product, ProductPhoto } from './product.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Like } from 'typeorm';
 import { UsersService } from '../users/users.service';
 
 @Injectable()
@@ -13,6 +14,8 @@ export class ProductsService {
   constructor(
     @InjectRepository(Product)
     private readonly productsRepository: Repository<Product>,
+    @InjectRepository(ProductPhoto)
+    private readonly photosRepository: Repository<ProductPhoto>,
     private readonly usersService: UsersService,
   ) {}
 
@@ -35,6 +38,18 @@ export class ProductsService {
     });
   }
 
+  async addPhoto(photo: ProductPhoto): Promise<ProductPhoto> {
+    const { url, productId } = photo;
+
+    const newProduct = this.photosRepository.create({ url, productId });
+
+    return this.photosRepository.save(newProduct);
+  }
+
+  async findPhotos(productId: number): Promise<ProductPhoto[]> {
+    return this.photosRepository.find({ productId });
+  }
+
   async create(product: Product): Promise<Product> {
     const newProduct = await this.productsRepository.create(product);
 
@@ -53,5 +68,9 @@ export class ProductsService {
     }
 
     await this.productsRepository.remove(product);
+  }
+
+  async search(query: string): Promise<Product[]> {
+    return this.productsRepository.find({ name: Like(`%${query}%`) });
   }
 }
