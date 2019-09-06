@@ -21,12 +21,12 @@ import {
 import { Length, IsAlphanumeric } from 'class-validator';
 
 export class LoginDto {
-  @ApiModelProperty({ example: 'john-doe', required: true, minLength: 7 })
+  @ApiModelProperty({ example: 'johndoe', required: true, minLength: 7 })
   @Length(7)
   @IsAlphanumeric()
   username: string;
 
-  @ApiModelProperty({ example: 'change-me', required: true, minLength: 8 })
+  @ApiModelProperty({ example: 'changeme', required: true, minLength: 8 })
   @Length(8)
   password: string;
 }
