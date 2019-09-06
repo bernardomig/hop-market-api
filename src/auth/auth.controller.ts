@@ -18,7 +18,7 @@ import {
   ApiForbiddenResponse,
   ApiCreatedResponse,
 } from '@nestjs/swagger';
-import { Length, IsAlphanumeric } from 'class-validator';
+import { Length, IsAlphanumeric, IsEmail, IsNumber, IsDate } from 'class-validator';
 
 export class LoginDto {
   @ApiModelProperty({ example: 'john-doe', required: true, minLength: 7 })
@@ -32,16 +32,30 @@ export class LoginDto {
 }
 
 export class LoginTokenDto {
-  @ApiModelProperty({ description: 'The bearer token' })
+  @ApiModelProperty({ description: 'The bearer token.' })
   token: string;
 }
 
-export class RegisterDto extends LoginDto {}
+export class RegisterDto extends LoginDto {
+
+  @ApiModelProperty({ example: 'Bernardo', required: true, description: 'User\'s first name.' })
+  @IsAlphanumeric()
+  first_name: string;
+
+  @ApiModelProperty({ example: 'Lourenço', required: true, description: 'User\'s surname.' })
+  @IsAlphanumeric()
+  surname: string;
+
+  @ApiModelProperty({ example: 'benny_benassi@ua.pt', required: true, description: 'User\'s email.' })
+  @IsEmail()
+  email: string;
+
+}
 
 @ApiUseTags('Authentication')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @ApiOperation({ title: 'Logins the user' })
   @ApiImplicitBody({ type: LoginDto, name: 'Login' })

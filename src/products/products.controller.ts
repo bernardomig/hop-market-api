@@ -27,21 +27,21 @@ export class CreateProductDto {
   @Length(5)
 
   @ApiModelProperty({
-    description: 'the name of the product',
+    description: 'The name of the product.',
     required: true,
     example: 'apple pie',
   })
   name: string;
 
   @ApiModelProperty({
-    description: 'the description of the product',
+    description: 'The description of the product.',
     required: true,
     example: 'This pie is made of apples and is provided by the bakery "Lusitana".',
   })
   description: string = '';
 
   @ApiModelProperty({
-    description: 'the ingredients that make up the final product',
+    description: 'The ingredients that make up the final product.',
     required: false,
     example: 'apples,sugar,flour,milk',
   })
@@ -54,7 +54,7 @@ export class CreateProductDto {
 
 export class ProductBriefDto {
   @ApiModelProperty({
-    description: 'the id of the product',
+    description: 'The id of the product.',
     required: true,
     example: 32,
   })
@@ -62,14 +62,14 @@ export class ProductBriefDto {
   productId: number;
 
   @ApiModelProperty({
-    description: 'the id of the user',
+    description: 'The id of the user.',
     required: true,
     example: 1
   })
   @Expose()
   userId: number;
 
-  @ApiModelProperty({ description: 'the name of the product' })
+  @ApiModelProperty({ description: 'The name of the product.' })
   @Expose()
   name: string;
 
@@ -97,6 +97,8 @@ export class ProductsController {
     return products.map(productBriefTransform);
   }
 
+  @ApiOperation({ title: 'Returns the Qr code related to the corresponding product ID' })
+  @ApiResponse({ status: 200 })
   @Get(':id/qr')
   async generateQrCode(@Param('id') id: number): Promise<string> {
     const product = await this.productsService.findOne(id);
