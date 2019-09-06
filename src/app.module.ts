@@ -17,8 +17,8 @@ import { TransactionsModule } from './transactions/transactions.module';
       type: 'mariadb',
       database: 'hopmarket',
       host: 'localhost',
-      username: 'hop-market',
-      password: 'password',
+      username: 'hopmarket',
+      password: 'hopmarket',
       logging: true,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,
@@ -33,4 +33,4 @@ import { TransactionsModule } from './transactions/transactions.module';
   providers: [QrcodeService],
   exports: [QrcodeService],
 })
-export class AppModule {}
+export class AppModule { }
