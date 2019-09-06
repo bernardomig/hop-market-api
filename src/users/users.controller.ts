@@ -1,11 +1,14 @@
 import { Controller, Get, Param } from '@nestjs/common';
-import { ApiUseTags } from '@nestjs/swagger';
+import {
+  ApiUseTags,
+  ApiModelProperty
+} from '@nestjs/swagger';
 import { UsersService } from './users.service';
 
 @ApiUseTags('Users')
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersRepository: UsersService) {}
+  constructor(private readonly usersRepository: UsersService) { }
 
   @Get()
   async findAll() {
@@ -17,3 +20,4 @@ export class UsersController {
     return this.usersRepository.findOne(id);
   }
 }
+

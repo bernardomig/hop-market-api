@@ -24,10 +24,26 @@ import { plainToClass, classToPlain, Expose } from 'class-transformer';
 
 export class CreateProductDto {
   @Length(5)
+
+  @ApiModelProperty({
+    description: 'the name of the product',
+    required: true,
+    example: 'apple pie',
+  })
   name: string;
 
+  @ApiModelProperty({
+    description: 'the description of the product',
+    required: true,
+    example: 'This pie is made of apples and is provided by the bakery "Lusitana".',
+  })
   description: string = '';
 
+  @ApiModelProperty({
+    description: 'the ingredients that make up the final product',
+    required: false,
+    example: 'apples,sugar,flour,milk',
+  })
   ingredients: number[] = [];
 }
 
@@ -40,6 +56,11 @@ export class ProductBriefDto {
   @Expose()
   productId: number;
 
+  @ApiModelProperty({
+    description: 'the id of the user',
+    required: true,
+    example: 1
+  })
   @Expose()
   userId: number;
 
@@ -57,7 +78,7 @@ export class ProductsController {
   constructor(
     private readonly productsService: ProductsService,
     private readonly qrCodeService: QrcodeService,
-  ) {}
+  ) { }
 
   @Get()
   async findAll(): Promise<ProductBriefDto[]> {
