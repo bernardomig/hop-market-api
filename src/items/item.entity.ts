@@ -11,20 +11,26 @@ import { Product } from '../products/product.entity';
 @Entity({ name: 'items' })
 export class Item {
   @PrimaryGeneratedColumn()
-  itemId: number;
+  itemId?: number;
 
   @Column()
   productId: number;
 
   @ManyToOne(type => Product)
-  product: Promise<Product>;
+  product?: Promise<Product>;
 
   @Column()
   userId: number;
 
   @ManyToOne(type => User, { lazy: true })
-  user: Promise<User>;
+  user?: Promise<User>;
 
   @CreateDateColumn()
-  createAt: string;
+  createAt?: string;
+
+  @Column()
+  inCirculation?: boolean;
+
+  @Column('point')
+  location: string;
 }

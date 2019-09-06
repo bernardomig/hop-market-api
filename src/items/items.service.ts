@@ -27,9 +27,19 @@ export class ItemsService {
     return item;
   }
 
-  async create(userId: number, productId: number): Promise<Item> {
+  async findByUser(userId: number): Promise<Item[]> {
+    return this.itemsRepository.find({ userId });
+  }
+
+  async create(item: Item): Promise<Item> {
+    const { userId, productId } = item;
+
     const user = await this.usersService.findOne(userId);
     const product = await this.productsService.findOne(productId);
+
+    if (!product) {
+      throw new BadRequestException('product does not exist');
+    }
 
     if (user.userId !== product.userId) {
       throw new BadRequestException(
@@ -37,9 +47,9 @@ export class ItemsService {
       );
     }
 
-    const item = await this.itemsRepository.create({ userId, productId });
+    const newItem = await this.itemsRepository.create(item);
 
-    return this.itemsRepository.save(item);
+    return this.itemsRepository.save(newItem);
   }
 
   async transfer(itemId: number, ownerId: number, buyerId: number) {

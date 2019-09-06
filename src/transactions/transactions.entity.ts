@@ -5,8 +5,14 @@ import {
   CreateDateColumn,
 } from 'typeorm';
 
+export enum TransactionType {
+  Create,
+  Craft,
+  Transfer,
+  Delete,
+}
 
-@Entity({ name: 'Transactions' })
+@Entity({ name: 'transactions' })
 export class Transactions {
   @PrimaryGeneratedColumn({ name: 'id' })
   productId?: number;
@@ -20,7 +26,6 @@ export class Transactions {
   @Column('point')
   locatedIn: number;
 
-  @Column()
-  typeTransaction: string;
-
+  @Column('enum', { enum: TransactionType })
+  type: string;
 }
