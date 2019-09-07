@@ -4,7 +4,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 
-import { Product, ProductPhoto } from './product.entity';
+import { Product } from './product.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like } from 'typeorm';
 import { UsersService } from '../users/users.service';
@@ -14,8 +14,6 @@ export class ProductsService {
   constructor(
     @InjectRepository(Product)
     private readonly productsRepository: Repository<Product>,
-    @InjectRepository(ProductPhoto)
-    private readonly photosRepository: Repository<ProductPhoto>,
     private readonly usersService: UsersService,
   ) {}
 
@@ -31,23 +29,23 @@ export class ProductsService {
     return this.productsRepository.find({ userId });
   }
 
+  async listIngredients(productId: number): Promise<Product[]> {
+    const product = await this.productsRepository.findOne(productId, {
+      relations: ['ingredients'],
+    });
+
+    if (!product) {
+      throw new BadRequestException('product does not exist');
+    }
+
+    return product.ingredients;
+  }
+
   async latest(): Promise<Product[]> {
     return this.productsRepository.find({
       order: { createdAt: 'DESC' },
       take: 10,
     });
-  }
-
-  async addPhoto(photo: ProductPhoto): Promise<ProductPhoto> {
-    const { url, productId } = photo;
-
-    const newProduct = this.photosRepository.create({ url, productId });
-
-    return this.photosRepository.save(newProduct);
-  }
-
-  async findPhotos(productId: number): Promise<ProductPhoto[]> {
-    return this.photosRepository.find({ productId });
   }
 
   async create(product: Product): Promise<Product> {

@@ -6,9 +6,8 @@ import { AuthModule } from './auth/auth.module';
 import { ProductsModule } from './products/products.module';
 import { UsersModule } from './users/users.module';
 import { ItemsModule } from './items/items.module';
-import { QrcodeService } from './qrcode/qrcode.service';
+import { QrcodeService } from './qrcode.service';
 
-import { env } from 'process';
 import { TransactionsModule } from './transactions/transactions.module';
 import { FilesService } from './files.service';
 

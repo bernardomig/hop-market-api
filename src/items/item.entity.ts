@@ -31,6 +31,6 @@ export class Item {
   @Column()
   inCirculation?: boolean;
 
-  @Column('point')
+  @Column()
   location: string;
 }

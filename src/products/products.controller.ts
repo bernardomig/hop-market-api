@@ -7,32 +7,22 @@ import {
   Post,
   Query,
   Request,
-  Res,
-  UploadedFiles,
   UseGuards,
-  UseInterceptors,
-  Put,
-  ForbiddenException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { FilesInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
-  ApiConsumes,
-  ApiImplicitFile,
   ApiModelProperty,
   ApiOperation,
   ApiResponse,
   ApiUseTags,
 } from '@nestjs/swagger';
 import { Expose, plainToClass } from 'class-transformer';
-import { Length } from 'class-validator';
-import { Response } from 'express';
+import { Length, IsArray } from 'class-validator';
+
 import { Login } from '../auth/login.interface';
 import { FilesService } from '../files.service';
-import { QrcodeService } from '../qrcode/qrcode.service';
 import { ProductsService } from './products.service';
-import { userInfo } from 'os';
 
 export class CreateProductDto {
   @Length(5)
@@ -46,17 +36,23 @@ export class CreateProductDto {
   @ApiModelProperty({
     description: 'The description of the product.',
     required: true,
-    example:
-      'This pie is made of apples and is provided by the bakery "Lusitana".',
+    example: `This pie is made of apples and is provided by the bakery 'Lusitana'.`,
   })
   description: string = '';
 
   @ApiModelProperty({
     description: 'The ingredients that make up the final product.',
     required: false,
-    example: 'apples,sugar,flour,milk',
+    example: [1, 2],
+    default: [],
   })
+  @IsArray({ message: 'Should be an array' })
   ingredients: number[] = [];
+
+  @ApiModelProperty({
+    description: 'The url of the products photo',
+  })
+  photo: string;
 }
 
 export class ProductBriefDto {
@@ -79,6 +75,10 @@ export class ProductBriefDto {
   @ApiModelProperty({ description: 'The name of the product.' })
   @Expose()
   name: string;
+
+  @ApiModelProperty({ description: 'the photo url of the product' })
+  @Expose()
+  photo: string;
 }
 
 const productBriefTransform = product =>
@@ -91,21 +91,6 @@ export class ProductsController {
     private readonly productsService: ProductsService,
     private readonly fileService: FilesService,
   ) {}
-
-  @Get('photos')
-  async photos(): Promise<number[]> {
-    return [];
-  }
-
-  @ApiConsumes('multipart/form-data')
-  @ApiImplicitFile({ name: 'files', description: 'List of cats' })
-  @Post('photos')
-  @UseInterceptors(FilesInterceptor('files'))
-  async uploadPhotos(@UploadedFiles() files: any[]) {
-    return files.map(({ buffer, originalname, mimetype }) =>
-      this.fileService.upload('images', originalname, buffer, mimetype),
-    );
-  }
 
   @Get('search')
   async search(@Query('q') query: string): Promise<ProductBriefDto[]> {
@@ -153,47 +138,15 @@ export class ProductsController {
     return this.productsService.findOne(productId);
   }
 
-  @Get(':id/photos')
-  async listPhotos(@Param('id') id: number) {
-    const photos = await this.productsService.findPhotos(id);
+  @ApiOperation({ title: 'Lists the ingredients of a product' })
+  @Get(':id/ingredients')
+  async listIngredients(@Param('id') id: number): Promise<ProductBriefDto[]> {
+    const products = await this.productsService.listIngredients(id);
 
-    return photos.map(({ photoId, url }) => ({
-      photoId,
-      url,
-    }));
+    return products.map(productBriefTransform);
   }
 
-  @Put(':id/photos')
-  @UseGuards(AuthGuard())
-  @UseInterceptors(FilesInterceptor('files'))
-  async addPhotos(
-    @Request() req: { user: Login },
-    @Param('id') id: number,
-    @UploadedFiles() files: any[],
-  ) {
-    const product = await this.productsService.findOne(id);
-
-    if (product.userId !== req.user.userId) {
-      throw new ForbiddenException('Add photos to product not allowed');
-    }
-
-    const urls = files.map(({ buffer, originalname, mimetype }) =>
-      this.fileService.upload('images', originalname, buffer, mimetype),
-    );
-
-    return Promise.all(
-      urls.map(url =>
-        this.productsService
-          .addPhoto({
-            url,
-            product: this.productsService.findOne(id),
-            productId: product.productId,
-          })
-          .then(({ url }) => url),
-      ),
-    );
-  }
-
+  // @ApiConsumes('multipart/form-data')
   @ApiOperation({ title: 'Creates a new product' })
   @ApiBearerAuth()
   @UseGuards(AuthGuard())
@@ -204,17 +157,20 @@ export class ProductsController {
   ) {
     const { userId } = request.user;
 
-    const { name, description, ingredients } = product;
+    const { name, description, ingredients, photo } = product;
 
     const { productId } = await this.productsService.create({
       name,
       description: description || '',
-      ingredients: Promise.all(
-        ingredients.map(ingredientId =>
-          this.productsService.findOne(ingredientId),
-        ),
-      ),
+      ingredients: !ingredients
+        ? []
+        : await Promise.all(
+            ingredients.map(ingredientId =>
+              this.productsService.findOne(ingredientId),
+            ),
+          ),
       userId,
+      photo,
     });
 
     return {

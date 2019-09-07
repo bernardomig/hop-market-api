@@ -30,14 +30,17 @@ class ItemCreateDto {
   @ApiModelProperty({ description: 'The ID of the product.', example: '88' })
   productId: number;
 
-  @ApiModelProperty({ description: 'This is the coordinates related to each transaction.', example: '40.63030438865182,-8.657526969909668' })
+  @ApiModelProperty({
+    description: 'This is the coordinates related to each transaction.',
+    example: '40.63030438865182,-8.657526969909668',
+  })
   location: string;
 }
 
 @ApiUseTags('Items')
 @Controller('items')
 export class ItemsController {
-  constructor(private readonly itemsService: ItemsService) { }
+  constructor(private readonly itemsService: ItemsService) {}
 
   @ApiOperation({ title: 'Lists all the items' })
   @Get()
@@ -90,10 +93,7 @@ export class ItemsController {
 
     location.replace(',', ' ');
 
-    const { itemId } = await this.itemsService.create({
-      ...item,
-      location: `POINT(${location})`,
-    });
+    const { itemId } = await this.itemsService.create(item);
 
     return { itemId };
   }
